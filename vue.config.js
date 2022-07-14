@@ -1,7 +1,7 @@
 const ENV = process.env.NODE_ENV
 module.exports = {
   lintOnSave: ENV !== 'production',
-  publicPath: './',
+  publicPath: '/',
   productionSourceMap: false,
   // 跨域处理
   devServer: {

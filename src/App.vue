@@ -1,5 +1,12 @@
 <template>
-  <router-view></router-view>
+  <!-- router-view使用插槽的获取匹配到的路由组件 -->
+  <!-- 传入keep-alive组件和component动态组件方式实现路由组件缓存 -->
+  <router-view v-slot="{ Component }">
+    <!-- 只缓存组件名为Home的组件(通过组件内部的name属性定义的组件名) -->
+    <keep-alive include="Home">
+      <component :is="Component" />
+    </keep-alive>
+  </router-view>
 </template>
 
 <script>

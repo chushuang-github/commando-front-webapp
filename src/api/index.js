@@ -9,3 +9,17 @@ export const queryNewsBefore = (time) => {
     params: { time },
   })
 }
+
+// 获取新闻详情
+export const queryNewsInfo = (id) => {
+  return axios.get('/api/news_info', {
+    params: { id },
+  })
+}
+
+// 获取新闻评论信息
+export const queryNewsStory = (id) => {
+  return axios.get('/api/story_extra', {
+    params: { id },
+  })
+}

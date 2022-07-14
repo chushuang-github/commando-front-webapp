@@ -5,7 +5,7 @@ import store from './store'
 // 重置样式表
 import './assets/reset.css'
 // Vant组件库
-import Vant from 'vant'
+import Vant, { Lazyload } from 'vant'
 import 'vant/lib/index.css'
 // 移动端适配，设置根html标签的font-size大小
 import 'amfe-flexible'
@@ -20,6 +20,10 @@ window.addEventListener('resize', () => {
 
 const app = createApp(App)
 app.use(Vant)
+// 图片懒加载 (注册之后会多一个v-lazy的自定义指令)
+app.use(Lazyload, {
+  lazyComponent: true,
+})
 app.use(store)
 app.use(router)
 app.mount('#app')

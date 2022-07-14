@@ -1,6 +1,6 @@
 import axios from './http'
 
-// 获取今日新闻
+// 获取今日新闻 (里面有一项数据就是轮播图数据)
 export const queryNewsLatest = () => axios.get('/api/news_latest')
 
 // 获取往日新闻

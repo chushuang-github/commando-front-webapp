@@ -14,7 +14,8 @@
 </template>
 
 <script>
-import { reactive, computed, toRefs } from '@vue/reactivity'
+import { computed, onBeforeMount } from 'vue'
+import { useStore } from 'vuex'
 import { formatTime } from '../assets/utils'
 import defaultAvatar from '../assets/images/timg.jpg'
 
@@ -27,9 +28,8 @@ export default {
     },
   },
   setup(props) {
-    let state = reactive({
-      pic: defaultAvatar,
-    })
+    let store = useStore()
+
     let timeNow = computed(() => {
       let time = props.time || null
       let [month, day] = formatTime(time, '{1}-{2}').split('-')
@@ -53,8 +53,23 @@ export default {
       }
     })
 
+    let pic = computed(() => {
+      let { isLogin, info } =  store.state
+      if (isLogin && info) {
+        return info.pic || defaultAvatar
+      }
+      return defaultAvatar
+    })
+
+    // 判断用户是否登录
+    onBeforeMount(() => {
+      let { isLogin, info } =  store.state
+      if (isLogin === null) store.dispatch('changeIsLoginAsync')
+      if (info === null) store.dispatch('changeInfoAsync')
+    })
+
     return {
-      ...toRefs(state),
+      pic,
       timeNow,
     }
   },

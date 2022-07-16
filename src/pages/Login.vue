@@ -102,6 +102,7 @@ export default {
       }
       localStorage.setItem('token', token)
       store.commit('changeIsLogin', true)
+      store.commit('changeStoreList', null)
       // 获取用户信息
       await store.dispatch('changeInfoAsync')
       Toast('登录成功')

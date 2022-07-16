@@ -36,14 +36,30 @@ export default {
     const store = useStore()
     const router = useRouter()
 
-    let name = store.state.info.name
-    let url = store.state.info.pic
+    let { name } = store.state.info
     let state = reactive({
       name,
-      pic: [{ url }],
+      pic: [],
     })
 
-    const submit = () => {}
+    const submit = async () => {
+      let { name, pic } = state
+      // 姓名格式校验 \w：字母数字下划线；\u4e00-\u9fa5：表示中文汉字正则
+      let reg = /^[\w\u4e00-\u9fa5]+$/
+      if (!reg.test(name)) {
+        return Toast('用户名格式不正确')
+      }
+      if (pic.length === 0) {
+        return Toast('请选择用户头像')
+      }
+      const { code, data } = await userUpdate(name, pic[0].file)
+      if(code !== 0) {
+        return Toast('用户信息修改失败，请稍后再试')
+      }
+      Toast('信息修改成功')
+      store.commit('changeInfo', data)
+      router.replace('/person')
+    }
 
     return {
       ...toRefs(state),

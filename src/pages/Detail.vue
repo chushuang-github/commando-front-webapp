@@ -5,8 +5,12 @@
     <van-icon name="arrow-left" @click="handle" />
     <van-icon name="comment-o" :badge="comments" />
     <van-icon name="good-job-o" :badge="popularity" />
-    <van-icon name="star-o" color="#1989fa" />
-    <van-icon name="share-o" color="#ccc" />
+    <van-icon
+      name="star-o"
+      :color="isStore ? '#1989fa' : '#000000'"
+      @click="favor"
+    />
+    <van-icon name="share-o" color="#cccccc" />
   </div>
 </template>
 
@@ -14,22 +18,48 @@
 import {
   reactive,
   toRefs,
+  computed,
   onBeforeMount,
   onBeforeUnmount,
   onUpdated,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { queryNewsInfo, queryNewsStory } from '../api'
+import { useStore } from 'vuex'
+import { Toast } from 'vant'
+import { queryNewsInfo, queryNewsStory, store as storeFn } from '../api'
 
 export default {
   name: 'Detail',
   setup() {
     const route = useRoute()
     const router = useRouter()
+    const store = useStore()
     let state = reactive({
       comments: 0,
       popularity: 0,
       newsInfo: null,
+    })
+
+    // 计算属性返回的是一个ref类型的数据，setup函数里面取ref类型值的需要加上 .value
+    // isStore：该新闻是否被收藏了
+    let isStore = computed(() => {
+      let { isLogin, storeList } = store.state
+      if (isLogin) {
+        if (storeList === null) storeList = []
+        return storeList.some((item) => item.news.id === route.params.id)
+      }
+      return false
+    })
+
+    onBeforeMount(async () => {
+      if (store.state.isLogin === null) {
+        await store.dispatch('changeIsLoginAsync')
+      }
+      if (store.state.isLogin) {
+        let { info, storeList } = store.state
+        if (info === null) store.dispatch('changeInfoAsync')
+        if (storeList === null) store.dispatch('changeStoreListAsync')
+      }
     })
 
     onBeforeMount(async () => {
@@ -67,9 +97,32 @@ export default {
       router.back()
     }
 
+    // 收藏新闻
+    const favor = async () => {
+      // 如果没有登录，或者已经收藏了该新闻，点击跳转登录
+      if (!store.state.isLogin) {
+        Toast('小主，请先登录')
+        router.push({
+          path: '/login',
+          query: { from: route.fullPath },
+        })
+        return
+      }
+      // 已经收藏，直接结束
+      if (isStore.value) return
+      const { code } = await storeFn(route.params.id)
+      if (code !== 0) {
+        return Toast('收藏新闻失败')
+      }
+      Toast('收藏新闻成功')
+      store.dispatch('changeStoreListAsync')
+    }
+
     return {
       ...toRefs(state),
+      isStore,
       handle,
+      favor,
     }
   },
 }
